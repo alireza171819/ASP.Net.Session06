@@ -3,10 +3,9 @@ using Session06.ApplicationServices.Services.Contracts;
 using Session06.Models.DomainModels.ProductAggregates;
 using Session06.Models.Services.Contracts;
 
-
 namespace Session06.ApplicationServices.Services
 {
-    public class ProductService : IProductService
+    public class ProductApplicationService : IProductApplicationService
     {
         #region Privet Fields
 
@@ -16,7 +15,7 @@ namespace Session06.ApplicationServices.Services
 
         #region Constructor
 
-        public ProductService(IProductRepository productRepository)
+        public ProductApplicationService(IProductRepository productRepository)
         {
             _productRepository = productRepository;
         }
@@ -24,17 +23,17 @@ namespace Session06.ApplicationServices.Services
         #endregion
 
         #region Public Methods
-        public async Task<List<ProductList>> GetAllProductsAsync()
+        public async Task<List<GetAllProductDto>> GetAll()
         {
             var products = await Task.FromResult(_productRepository.GetAllProducts());
             if (products == null || !products.Any())
             {
-                return new List<ProductList>();
+                return new List<GetAllProductDto>();
             }
-            var productsList = new List<ProductList>();
+            var productsList = new List<GetAllProductDto>();
             foreach (var product in products)
             {
-                var productList = new ProductList
+                var productList = new GetAllProductDto
                 {
                     Id = product.Id,
                     ProductName = product.ProductName,
@@ -45,40 +44,52 @@ namespace Session06.ApplicationServices.Services
             }
             return productsList;
         }
-        public async Task<ProductDetail> GetProductByIdAsync(Guid id)
+        public async Task<GetByIdProductDto> GetById(Guid id)
         {
             var product = _productRepository.GetProductById(id);
             if (product == null)
             {
                 return null;
             }
-            var productDetail = new ProductDetail();
+            var productDetail = new GetByIdProductDto();
             productDetail.Id = product.Id;
             productDetail.ProductName = product.ProductName;
             productDetail.ProductDescription = product.ProductDescription;
             productDetail.UnitPrice = product.UnitPrice;
             return productDetail;
         }
-        public void AddProductAsync(ProductCreate productCreate)
+        public void Add(AddProductDto addProductDto)
         {
+            if (addProductDto == null)
+            {
+                return;
+            }
             var product = new Product();
-            product.ProductName = productCreate.ProductName;
-            product.ProductDescription = productCreate.ProductDescription;
-            product.UnitPrice = productCreate.UnitPrice;
+            product.ProductName = addProductDto.ProductName;
+            product.ProductDescription = addProductDto.ProductDescription;
+            product.UnitPrice = addProductDto.UnitPrice;
             _productRepository.AddProduct(product);
         }
-        public void UpdateProductAsync(ProductUpdate productUpdate)
+        public void Update(UpdateProductDto updateProductDto)
         {
+            if (updateProductDto == null)
+            {
+                return;
+            }
             var product = new Product();
-            product.ProductName = productUpdate.ProductName;
-            product.ProductDescription = productUpdate.ProductDescription;
-            product.UnitPrice = productUpdate.UnitPrice;
-            product.Id = productUpdate.Id;
+            product.ProductName = updateProductDto.ProductName;
+            product.ProductDescription = updateProductDto.ProductDescription;
+            product.UnitPrice = updateProductDto.UnitPrice;
+            product.Id = updateProductDto.Id;
             _productRepository.UpdateProduct(product);
         }
-        public void DeleteProductAsync(ProductDelete productDelete)
+        public void Delete(DeleteProductDto deleteProductDto)
         {
-            _productRepository.DeleteProduct(productDelete.Id);
+            if (deleteProductDto == null)
+            {
+                return;
+            }
+            _productRepository.DeleteProduct(deleteProductDto.Id);
         }
 
         #endregion

@@ -12,9 +12,9 @@ namespace Session06.Controllers
 {
     public class ProductController : Controller
     {
-        private readonly IProductService _productService;
+        private readonly IProductApplicationService _productService;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductApplicationService productService)
         {
             _productService = productService;
         }
@@ -22,7 +22,12 @@ namespace Session06.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            return View(await _productService.GetAllProductsAsync());
+            var products = await _productService.GetAllProductsAsync();
+            if (products == null)
+            {
+                return View();
+            }
+            return View(products);
         }
 
         // GET: Products/Details/5
@@ -53,7 +58,7 @@ namespace Session06.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductName,ProductDescription,UnitPrice")] ProductCreate productCreate)
+        public async Task<IActionResult> Create([Bind("ProductName,ProductDescription,UnitPrice")] AddProductDto productCreate)
         {
             if (ModelState.IsValid)
             {
@@ -76,7 +81,7 @@ namespace Session06.Controllers
             {
                 return NotFound();
             }
-            var productUpdate = new ProductUpdate
+            var productUpdate = new UpdateProductDto
             {
                 Id = productDetail.Id,
                 ProductName = productDetail.ProductName,
@@ -91,7 +96,7 @@ namespace Session06.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,ProductName,ProductDescription,UnitPrice")] ProductUpdate productUpdate)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,ProductName,ProductDescription,UnitPrice")] UpdateProductDto productUpdate)
         {
             if (id != productUpdate.Id)
             {
@@ -145,7 +150,7 @@ namespace Session06.Controllers
             var product = await _productService.GetProductByIdAsync(id);
             if (product != null)
             {
-                var productDelete = new ProductDelete();
+                var productDelete = new DeleteProductDto();
                 productDelete.Id = id;
                 _productService.DeleteProductAsync(productDelete);
             }

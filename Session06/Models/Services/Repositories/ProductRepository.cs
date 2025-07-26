@@ -25,12 +25,51 @@ namespace Session06.Models.Services.Repositories
         #region IProductRepository Implementation
         public IEnumerable<Product> GetProducts()
         {
-            return _context.Products.ToList();
+            using (_context)
+            {
+                try
+                {
+                    return _context.Products.ToList();
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+                finally
+                {
+                    if (_context is not null)
+                    {
+                        _context.Dispose();
+                    }
+                }
+            }
+            
         }
 
         public Product GetProductById(Guid id)
         {
-            return _context.Products.FirstOrDefault(p => p.Id == id);
+            if (id == Guid.Empty)
+            {
+                return null;
+            }
+            using (_context)
+            {
+                try
+                {
+                    return _context.Products.FirstOrDefault(p => p.Id == id);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+                finally
+                {
+                    if (_context is not null)
+                    {
+                        _context.Dispose();
+                    }
+                }
+            }
         }
 
         public void AddProduct(Product product)
@@ -39,9 +78,8 @@ namespace Session06.Models.Services.Repositories
             _context.SaveChanges();
         }
 
-        public void DeleteProduct(Guid id)
+        public void DeleteProduct(Product product)
         {
-            var product = _context.Products.FirstOrDefault(p => p.Id == id);
             if (product != null)
             {
                 _context.Products.Remove(product);

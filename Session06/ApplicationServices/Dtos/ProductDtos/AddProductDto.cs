@@ -1,6 +1,6 @@
 ﻿namespace Session06.ApplicationServices.Dtos.ProductDtos
 {
-    public class ProductList
+    public class AddProductDto
     {
         public Guid Id { get; set; }
         public string ProductName { get; set; }
